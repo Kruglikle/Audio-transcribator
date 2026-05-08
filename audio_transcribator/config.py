@@ -7,6 +7,13 @@ class Settings:
         self.base_dir = Path(os.getenv("BASE_DIR", Path.cwd())).resolve()
         self.upload_dir = Path(os.getenv("UPLOAD_DIR", self.base_dir / "data" / "uploads")).resolve()
         self.results_dir = Path(os.getenv("RESULTS_DIR", self.base_dir / "data" / "api_results")).resolve()
+        self.model_cache_dir = Path(os.getenv("MODEL_CACHE_DIR", self.base_dir / "data" / "model_cache")).resolve()
+        self.hf_home = Path(os.getenv("HF_HOME", self.model_cache_dir / "huggingface")).resolve()
+        self.hf_hub_cache = Path(os.getenv("HF_HUB_CACHE", self.hf_home / "hub")).resolve()
+
+        os.environ.setdefault("HF_HOME", str(self.hf_home))
+        os.environ.setdefault("HF_HUB_CACHE", str(self.hf_hub_cache))
+        os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
 
         self.api_token = os.getenv("API_TOKEN", "test-token")
         self.api_username = os.getenv("API_USERNAME", "admin")
@@ -25,7 +32,9 @@ class Settings:
     def ensure_dirs(self) -> None:
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.results_dir.mkdir(parents=True, exist_ok=True)
+        self.model_cache_dir.mkdir(parents=True, exist_ok=True)
+        self.hf_home.mkdir(parents=True, exist_ok=True)
+        self.hf_hub_cache.mkdir(parents=True, exist_ok=True)
 
 
 settings = Settings()
-

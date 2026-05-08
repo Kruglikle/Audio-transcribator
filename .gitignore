@@ -13,9 +13,11 @@ env/
 data/uploads/*
 data/api_results/*
 data/local_artifacts/*
+data/model_cache/*
 !data/uploads/.gitkeep
 !data/api_results/.gitkeep
 !data/local_artifacts/.gitkeep
+!data/model_cache/.gitkeep
 
 *.mp3
 *.mp4

@@ -1,3 +1,4 @@
+import json
 import shutil
 import subprocess
 import sys
@@ -10,6 +11,50 @@ from audio_transcribator.config import settings
 from audio_transcribator.utils.files import tail
 
 
+STATUS_LABELS = {
+    "started": "Started",
+    "running": "Processing",
+    "completed": "Completed",
+    "completed_without_summary": "Completed without summary",
+    "failed": "Failed",
+}
+
+
+def save_job_metadata(job_dir: Path, input_file: Path, status: str) -> None:
+    metadata = {
+        "job_id": job_dir.name,
+        "status": status,
+        "input_file": str(input_file),
+        "files": sorted(p.name for p in job_dir.iterdir() if p.is_file()),
+    }
+    with open(job_dir / "metadata.json", "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+
+def load_job_metadata(job_dir: Path) -> dict:
+    metadata_file = job_dir / "metadata.json"
+    if not metadata_file.exists():
+        return {}
+
+    try:
+        return json.loads(metadata_file.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+
+
+def resolve_status(metadata: dict, files: list[str], log_tail: str) -> str:
+    status = metadata.get("status")
+    if status == "completed" and "summary.txt" not in files:
+        return "completed_without_summary"
+    if status in STATUS_LABELS:
+        return status
+    if "failed" in log_tail.lower() or "traceback" in log_tail.lower():
+        return "failed"
+    if "transcript.txt" in files:
+        return "completed_without_summary"
+    return "running"
+
+
 def build_job_result(job_id: str) -> dict:
     job_dir = settings.results_dir / job_id
     summary_file = job_dir / "summary.txt"
@@ -19,7 +64,17 @@ def build_job_result(job_id: str) -> dict:
     if not job_dir.exists():
         raise FileNotFoundError("Job not found")
 
-    result = {"job_id": job_id, "files": [p.name for p in job_dir.iterdir() if p.is_file()]}
+    files = [p.name for p in job_dir.iterdir() if p.is_file()]
+    metadata = load_job_metadata(job_dir)
+    log_tail = tail(log_file)
+    status = resolve_status(metadata, files, log_tail)
+
+    result = {
+        "job_id": job_id,
+        "files": files,
+        "status": status,
+        "status_label": STATUS_LABELS.get(status, status.title()),
+    }
 
     if transcript_file.exists():
         result["transcript"] = transcript_file.read_text(encoding="utf-8", errors="replace")
@@ -27,8 +82,8 @@ def build_job_result(job_id: str) -> dict:
     if summary_file.exists():
         result["summary"] = summary_file.read_text(encoding="utf-8", errors="replace")
 
-    if log_file.exists():
-        result["log_tail"] = tail(log_file)
+    if log_tail:
+        result["log_tail"] = log_tail
 
     return result
 
@@ -57,6 +112,8 @@ def start_uploaded_file(file: UploadFile) -> dict:
     with open(input_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
+    save_job_metadata(job_dir, input_path, status="started")
+
     log_path = job_dir / "run.log"
     command = [sys.executable, "process_audio_fast.py", str(input_path), str(job_dir)]
 
@@ -73,4 +130,3 @@ def start_uploaded_file(file: UploadFile) -> dict:
         "job_id": job_id,
         "message": "File uploaded and processing started",
     }
-

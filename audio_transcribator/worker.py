@@ -1,23 +1,16 @@
 import argparse
-import json
 from pathlib import Path
 
 from audio_transcribator.config import settings
 from audio_transcribator.services.audio import prepare_audio
 from audio_transcribator.services.diarization import diarize
+from audio_transcribator.services.jobs import save_job_metadata
 from audio_transcribator.services.summary import summarize
 from audio_transcribator.services.transcription import transcribe
 
 
 def save_metadata(job_dir: Path, input_file: Path, status: str = "completed") -> None:
-    metadata = {
-        "job_id": job_dir.name,
-        "status": status,
-        "input_file": str(input_file),
-        "files": sorted(p.name for p in job_dir.iterdir() if p.is_file()),
-    }
-    with open(job_dir / "metadata.json", "w", encoding="utf-8") as f:
-        json.dump(metadata, f, ensure_ascii=False, indent=2)
+    save_job_metadata(job_dir, input_file, status)
 
 
 def process_file(input_file: Path, job_dir: Path) -> None:
@@ -48,4 +41,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

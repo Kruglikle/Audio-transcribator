@@ -30,12 +30,14 @@ docker compose up --build
 ```
 
 После запуска через Docker Compose API доступен на `http://localhost:8001`.
+Простой веб-интерфейс доступен на `http://localhost:8001/ui`.
 
 ## Структура
 
 ```text
 audio_transcribator/
   api/routes.py          # FastAPI endpoint'ы
+  ui/routes.py           # web UI: login, upload, result, downloads
   auth.py                # token-based авторизация
   config.py              # настройки из env
   models.py              # Pydantic-схемы

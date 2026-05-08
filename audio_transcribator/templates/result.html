@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Result | Audio Transcribator{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="section-header">
+    <div>
+      <h1>Result</h1>
+      <p class="muted">Job ID: {{ result.job_id }}</p>
+    </div>
+    <a class="button-link" href="/ui/upload">New upload</a>
+  </div>
+
+  {% if downloads %}
+    <div class="downloads">
+      {% for filename in downloads %}
+        <a href="/ui/download/{{ result.job_id }}/{{ filename }}">{{ filename }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+
+{% if result.summary %}
+<section class="panel">
+  <h2>Summary</h2>
+  <pre>{{ result.summary }}</pre>
+</section>
+{% endif %}
+
+{% if result.transcript %}
+<section class="panel">
+  <h2>Transcript</h2>
+  <pre>{{ result.transcript }}</pre>
+</section>
+{% endif %}
+
+{% if result.log_tail %}
+<section class="panel">
+  <h2>Log</h2>
+  <pre>{{ result.log_tail }}</pre>
+</section>
+{% else %}
+<section class="panel">
+  <h2>Status</h2>
+  <p class="muted">Processing has started. Refresh this page to update the result.</p>
+</section>
+{% endif %}
+{% endblock %}
+

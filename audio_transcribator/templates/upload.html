@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Upload | Audio Transcribator{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <div class="section-header">
+    <h1>Upload file</h1>
+  </div>
+  <form class="form upload-form" method="post" action="/ui/upload" enctype="multipart/form-data">
+    <label>
+      Audio or video file
+      <input name="file" type="file" accept="audio/*,video/*" required>
+    </label>
+    <button type="submit">Start processing</button>
+  </form>
+</section>
+{% endblock %}
+

@@ -1,9 +1,11 @@
 from fastapi import APIRouter, File, Header, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from psycopg.errors import UniqueViolation
 
-from audio_transcribator.auth import check_auth, verify_credentials
+from audio_transcribator.auth import check_add_user_auth, check_auth, verify_credentials
 from audio_transcribator.config import settings
-from audio_transcribator.models import LoginRequest
+from audio_transcribator.db import create_user
+from audio_transcribator.models import AddUserRequest, LoginRequest
 from audio_transcribator.services.jobs import build_job_result, get_job_file, start_uploaded_file
 from audio_transcribator.utils.files import ALLOWED_DOWNLOADS
 
@@ -17,6 +19,20 @@ def login(data: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid username or password")
 
     return {"access_token": settings.api_token, "token_type": "bearer"}
+
+
+@router.post("/add-user", status_code=201)
+def add_user(data: AddUserRequest, authorization: str | None = Header(default=None)):
+    check_add_user_auth(authorization)
+
+    try:
+        create_user(data.username, data.password)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Username and password are required")
+    except UniqueViolation:
+        raise HTTPException(status_code=409, detail="User already exists")
+
+    return {"username": data.username, "created": True}
 
 
 @router.get("/")

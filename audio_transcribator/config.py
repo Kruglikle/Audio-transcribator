@@ -18,6 +18,14 @@ class Settings:
         self.api_token = os.getenv("API_TOKEN", "test-token")
         self.api_username = os.getenv("API_USERNAME", "admin")
         self.api_password = os.getenv("API_PASSWORD", "admin123")
+        self.add_user_admin_token = os.getenv("ADD_USER_ADMIN_TOKEN", "change-me-add-user-token")
+
+        self.database_url = os.getenv(
+            "DATABASE_URL",
+            "postgresql://audio_transcribator:audio_transcribator_password@localhost:5432/audio_transcribator",
+        )
+        self.database_connect_retries = int(os.getenv("DATABASE_CONNECT_RETRIES", "30"))
+        self.database_connect_delay_seconds = float(os.getenv("DATABASE_CONNECT_DELAY_SECONDS", "1"))
 
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         self.openrouter_base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")

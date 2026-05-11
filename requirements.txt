@@ -3,6 +3,7 @@ uvicorn[standard]
 python-multipart
 jinja2
 pydantic
+psycopg[binary]
 faster-whisper
 openai
 pyannote.audio

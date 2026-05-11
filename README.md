@@ -5,10 +5,12 @@ FastAPI-сервис для обработки аудио- и видеофайл
 ## Возможности
 
 - `POST /login` — авторизация и получение access token.
+- `POST /add-user` — добавление нового пользователя администратором.
 - `POST /process` — загрузка аудио/видео и запуск фоновой обработки.
 - `GET /result/{job_id}` — получение результата обработки по ID задачи.
 - `GET /download/{job_id}/{filename}` — скачивание отдельных файлов результата.
 - Token-based авторизация через `Authorization: Bearer <token>`.
+- Пользователи хранятся в PostgreSQL, пароль сохраняется в виде hash.
 - Поддержка аудио и видеоформатов, совместимых с `ffmpeg`.
 - Опциональная diarization через `pyannote`, если включен `ENABLE_DIARIZATION=true`.
 
@@ -31,6 +33,18 @@ docker compose up --build
 
 После запуска через Docker Compose API доступен на `http://localhost:8001`.
 Простой веб-интерфейс доступен на `http://localhost:8001/ui`.
+PostgreSQL поднимается отдельным контейнером `db`; при первом запуске приложение создает таблицу `users` и добавляет пользователя из `API_USERNAME`/`API_PASSWORD`, если такого login еще нет.
+
+Добавить пользователя можно через admin token:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://localhost:8001/add-user `
+  -Headers @{ Authorization = "Bearer change-me-add-user-token" } `
+  -ContentType "application/json" `
+  -Body '{"username":"user1","password":"strong-password"}'
+```
 
 ## Структура
 
@@ -40,6 +54,7 @@ audio_transcribator/
   ui/routes.py           # web UI: login, upload, result, downloads
   auth.py                # token-based авторизация
   config.py              # настройки из env
+  db.py                  # PostgreSQL users table и проверка паролей
   models.py              # Pydantic-схемы
   services/
     audio.py             # ffmpeg и подготовка аудио
@@ -59,7 +74,8 @@ data/
 
 Основные переменные окружения лежат в `.env.example`:
 
-- `API_TOKEN`, `API_USERNAME`, `API_PASSWORD`
+- `API_TOKEN`, `API_USERNAME`, `API_PASSWORD`, `ADD_USER_ADMIN_TOKEN`
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `DATABASE_URL`
 - `OPENROUTER_API_KEY`, `OPENROUTER_BASE_URL`, `SUMMARY_MODEL`
 - `WHISPER_MODEL`, `WHISPER_COMPUTE_TYPE`
 - `ENABLE_DIARIZATION`, `HF_TOKEN`

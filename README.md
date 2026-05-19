@@ -1,4 +1,4 @@
-# Audio Transcribator MVP
+# Стенограмма
 
 FastAPI-сервис для обработки аудио- и видеофайлов: загрузка файла, извлечение аудио через `ffmpeg`, транскрибация через `faster-whisper`, генерация summary через LLM и скачивание результатов.
 
@@ -100,10 +100,3 @@ data/
 - `TRANSCRIPTION_MODELS_FILE`
 - `ENABLE_DIARIZATION`, `HF_TOKEN`
 
-## Что не коммитить
-
-- входные медиафайлы: `*.mp3`, `*.mp4`, `*.wav`
-- результаты обработки: `transcript.txt`, `summary.txt`, `diarization.txt`, `speaker_transcript.txt`, `work_audio.wav`
-- логи: `*.log`
-- backup/черновики: `*_backup.py`, `*_before_api.py`
-- секреты: `.env`, API/HF/OpenRouter tokens

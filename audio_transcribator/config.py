@@ -37,6 +37,8 @@ class Settings:
         self.api_token = os.getenv("API_TOKEN", "test-token")
         self.api_username = os.getenv("API_USERNAME", "admin")
         self.api_password = os.getenv("API_PASSWORD", "admin123")
+        self.creator_username = os.getenv("CREATOR_USERNAME", "creator")
+        self.creator_password = os.getenv("CREATOR_PASSWORD", "creator123")
         self.add_user_admin_token = os.getenv("ADD_USER_ADMIN_TOKEN", "change-me-add-user-token")
 
         self.database_url = os.getenv(

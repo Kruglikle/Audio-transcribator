@@ -79,6 +79,7 @@ def init_database() -> None:
             )
 
     create_user(settings.api_username, settings.api_password, ignore_existing=True)
+    create_user(settings.creator_username, settings.creator_password, ignore_existing=True)
 
 
 def create_user(login: str, password: str, ignore_existing: bool = False) -> bool:
